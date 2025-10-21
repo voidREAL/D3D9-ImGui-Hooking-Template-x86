@@ -8,9 +8,10 @@ class DXD3D9 {
 public:
 	void* d3d9Vtable[119];
 
-	bool GetD3D9DeviceVTable(void** pTable, size_t size);
-	bool GetDInputDeviceVTable(void** table, size_t size);
-	HWND GetProcessWindow();
+	bool getD3D9DeviceVTable(void** pTable, size_t size);
+	bool getDInputDeviceVTable(void** table, size_t size);
+	HWND getProcessWindow();
+	DXD3D9();
 
 	HWND window;
 
@@ -24,7 +25,7 @@ public:
 	_Present present;
 	_Reset resetFunc;
 
-	DXD3D9();
+	bool isResourceInit;
 };
 
 extern DXD3D9 d3d9;

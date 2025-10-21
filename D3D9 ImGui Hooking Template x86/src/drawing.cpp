@@ -3,14 +3,14 @@
 
 Drawing drawing;
 
-void Drawing::DrawFilledRect(int x, int y, int w, int h, D3DCOLOR color) {
+void Drawing::drawFilledRect(int x, int y, int w, int h, D3DCOLOR color) {
 	D3DRECT rect = { x, y, x + w, y + h };
 	d3d9.pDevice->Clear(1, &rect, D3DCLEAR_TARGET, color, 0, 0);
 }
 
-void Drawing::DrawLine(int x1, int y1, int x2, int y2, int thickness, D3DCOLOR color)
+void Drawing::drawLine(int x1, int y1, int x2, int y2, int thickness, D3DCOLOR color)
 {
-	if (d3d9.lineL) {
+	if (!d3d9.lineL) {
 		D3DXCreateLine(d3d9.pDevice, &d3d9.lineL);
 	}
 
@@ -23,11 +23,11 @@ void Drawing::DrawLine(int x1, int y1, int x2, int y2, int thickness, D3DCOLOR c
 	}
 }
 
-void Drawing::DrawLine(Vec2 src, Vec2 dst, int thickness, D3DCOLOR color) {
-	DrawLine(src.x, src.y, dst.x, dst.y, thickness, color);
+void Drawing::drawLine(Vec2 src, Vec2 dst, int thickness, D3DCOLOR color) {
+	drawLine(src.x, src.y, dst.x, dst.y, thickness, color);
 }
 
-void Drawing::DrawTextOnScreen(const char* text, int x, int y, D3DCOLOR color) {
+void Drawing::drawTextOnScreen(const char* text, int x, int y, D3DCOLOR color) {
 	if (!d3d9.font) {
 		D3DXCreateFontA(
 			d3d9.pDevice,
@@ -56,7 +56,7 @@ void Drawing::DrawTextOnScreen(const char* text, int x, int y, D3DCOLOR color) {
 	}
 }
 
-void Drawing::DrawESPBox2D(Vec2 top, Vec2 bottom, int thickness, D3DCOLOR color) {
+void Drawing::drawESPBox2D(Vec2 top, Vec2 bottom, int thickness, D3DCOLOR color) {
 	int height = abs(top.y - bottom.y);
 	Vec2 tl, tr;
 	tl.x = top.x - (height / 4);
@@ -68,13 +68,13 @@ void Drawing::DrawESPBox2D(Vec2 top, Vec2 bottom, int thickness, D3DCOLOR color)
 	br.x = bottom.x + (height / 4);
 	bl.y = br.y = bottom.y;
 
-	DrawLine(tl, tr, thickness, color);
-	DrawLine(tr, br, thickness, color);
-	DrawLine(bl, br, thickness, color);
-	DrawLine(tl, bl, thickness, color);
+	drawLine(tl, tr, thickness, color);
+	drawLine(tr, br, thickness, color);
+	drawLine(bl, br, thickness, color);
+	drawLine(tl, bl, thickness, color);
 }
 
-void Drawing::DrawESPBox3D(const Vec3& head, const Vec3& feet, int thickness, float width, D3DCOLOR color) // without rotation angle
+void Drawing::drawESPBox3D(const Vec3& head, const Vec3& feet, int thickness, float width, D3DCOLOR color) // without rotation angle
 {
 	Vec3 up = { head.x - feet.x, head.y - feet.y, head.z - feet.z };
 
@@ -109,7 +109,7 @@ void Drawing::DrawESPBox3D(const Vec3& head, const Vec3& feet, int thickness, fl
 		}
 
 	auto L = [&](int a, int b) {
-		DrawLine(s[a].x, s[a].y, s[b].x, s[b].y, thickness, color);
+		drawLine(s[a].x, s[a].y, s[b].x, s[b].y, thickness, color);
 		};
 
 	L(0, 1); L(1, 3); L(3, 2); L(2, 0);
@@ -117,7 +117,7 @@ void Drawing::DrawESPBox3D(const Vec3& head, const Vec3& feet, int thickness, fl
 	L(0, 4); L(1, 5); L(2, 6); L(3, 7);
 }
 
-void Drawing::DrawDirectionLine(const Vec3& pos, float yaw, float length, D3DCOLOR color)
+void Drawing::drawDirectionLine(const Vec3& pos, float yaw, float length, D3DCOLOR color)
 {
 	Vec3 rayEnd;
 	rayEnd.x = pos.x + cosf(yaw + (M_PI / 2)) * length; // M_PI_2 = pi/2
@@ -127,18 +127,23 @@ void Drawing::DrawDirectionLine(const Vec3& pos, float yaw, float length, D3DCOL
 	Vec2 screenStart, screenEnd;
 	if (W2S(pos, screenStart) && W2S(rayEnd, screenEnd))
 	{
-		DrawLine(screenStart.x, screenStart.y, screenEnd.x, screenEnd.y, 2, color);
+		drawLine(screenStart.x, screenStart.y, screenEnd.x, screenEnd.y, 2, color);
 	}
+}
+
+void Drawing::updateViewMatrix()
+{
+	//Setup viewMatrix here
+	//memcpy(&viewMatrix, playerData.viewMatrix, sizeof(viewMatrix));
 }
 
 Drawing::Drawing()
 {
-	//Setup viewMatrix here
-	//memcpy(drawing.viewMatrix, playerData.viewMatrix, 16 * sizeof(float));
 }
 
 bool Drawing::worldToScreen(Vec3 pos, Vec2& screen, int windowWidth, int windowHeight)
 {
+	updateViewMatrix();
 	//Matrix-vector Product, multiplying world(eye) coordinates by projection matrix = clipCoords
 	Vec4 clipCoords;
 	clipCoords.x = pos.x * viewMatrix[0] + pos.y * viewMatrix[4] + pos.z * viewMatrix[8] + viewMatrix[12];

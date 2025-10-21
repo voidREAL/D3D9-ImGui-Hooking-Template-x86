@@ -14,7 +14,7 @@ DWORD WINAPI HackThread(HMODULE hModule) {
 	freopen_s(&f, "CONOUT$", "w", stdout);	
 	MemoryInternal mem;
 
-	Hooking::ImplementHooking();
+	Hooking::implementHooking();
 
 	//Keep DLL dont eject
 	while (true) {
@@ -27,7 +27,7 @@ DWORD WINAPI HackThread(HMODULE hModule) {
 
 	//Unhook and cleanup
 	{		
-		Hooking::UnHook();
+		Hooking::unHook();
 		render.cleanup();
 
 		//Set Original WndProc to game
@@ -41,7 +41,7 @@ DWORD WINAPI HackThread(HMODULE hModule) {
 			fclose(f);
 		}
 
-		Hooking::FreeGateway();
+		Hooking::freeGateway();
 
 		FreeLibraryAndExitThread(hModule, 0);
 		return 0;

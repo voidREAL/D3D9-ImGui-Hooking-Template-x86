@@ -46,7 +46,7 @@ bool Render::init(HWND window, LPDIRECT3DDEVICE9 device)
 			clipCursor = (_ClipCursor)mem.trampolineHook((BYTE*)addrClipCursor, (BYTE*)hkClipCursor, 6);
 		}
 
-		if (d3d9.GetDInputDeviceVTable(diVTable, sizeof(diVTable))) {
+		if (d3d9.getDInputDeviceVTable(diVTable, sizeof(diVTable))) {
 			getDeviceState = (_GetDeviceState)mem.trampolineHook((BYTE*)diVTable[9], (BYTE*)hkGetDeviceState, 5);
 		}
 	}

@@ -18,6 +18,22 @@ HRESULT APIENTRY Hooking::hookedPresent(LPDIRECT3DDEVICE9 o_pDevice, CONST RECT*
 		d3d9.pDevice = o_pDevice;
 	}
 
+	if (d3d9.pDevice && !d3d9.isResourceInit) {
+		LPDIRECT3DSURFACE9 backBuffer = nullptr;
+		d3d9.pDevice->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &backBuffer);
+
+		if (backBuffer) {
+			D3DSURFACE_DESC desc;
+			backBuffer->GetDesc(&desc);
+			backBuffer->Release();
+
+			d3d9.windowWidth = desc.Width;
+			d3d9.windowHeight = desc.Height;
+		}
+
+		d3d9.isResourceInit = true;
+	}
+
 	//Init backend of imgui
 	if (!render.state.isImGuiInit) {
 		D3DDEVICE_CREATION_PARAMETERS params;
@@ -59,17 +75,17 @@ HRESULT APIENTRY Hooking::hookedPresent(LPDIRECT3DDEVICE9 o_pDevice, CONST RECT*
 	return d3d9.present(o_pDevice, NULL, NULL, NULL, NULL);
 }
 
-void Hooking::ImplementHooking()
+void Hooking::implementHooking()
 {
 	MemoryInternal mem;
 
-	if (d3d9.GetD3D9DeviceVTable(d3d9.d3d9Vtable, sizeof(d3d9.d3d9Vtable))) {
+	if (d3d9.getD3D9DeviceVTable(d3d9.d3d9Vtable, sizeof(d3d9.d3d9Vtable))) {
 		d3d9.present = (_Present)mem.trampolineHook((BYTE*)d3d9.d3d9Vtable[17], (BYTE*)hookedPresent, 5);
 		d3d9.resetFunc = (_Reset)mem.trampolineHook((BYTE*)d3d9.d3d9Vtable[16], (BYTE*)hookedReset, 5);
 	}
 }
 
-void Hooking::UnHook()
+void Hooking::unHook()
 {
 	MemoryInternal mem;
 
@@ -77,7 +93,7 @@ void Hooking::UnHook()
 	mem.patch((BYTE*)d3d9.d3d9Vtable[16], (BYTE*)d3d9.resetFunc, 5);
 }
 
-void Hooking::FreeGateway()
+void Hooking::freeGateway()
 {
 	const size_t jmpSize = 5;
 	if (d3d9.present) VirtualFree(d3d9.present, 5 + jmpSize, MEM_FREE);

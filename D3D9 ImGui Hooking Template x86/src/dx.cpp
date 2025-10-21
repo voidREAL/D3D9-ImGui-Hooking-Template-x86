@@ -12,7 +12,7 @@ BOOL CALLBACK enumWind(HWND hwnd, LPARAM lParam) {
 	return TRUE;
 }
 
-HWND DXD3D9::GetProcessWindow() {
+HWND DXD3D9::getProcessWindow() {
 	window = NULL;
 
 	EnumWindows(enumWind, NULL);
@@ -30,7 +30,7 @@ HWND DXD3D9::GetProcessWindow() {
 	return window;
 }
 
-bool DXD3D9::GetD3D9DeviceVTable(void** pTable, size_t size) {
+bool DXD3D9::getD3D9DeviceVTable(void** pTable, size_t size) {
 	if (!pTable) {
 		return false;
 	}
@@ -47,7 +47,7 @@ bool DXD3D9::GetD3D9DeviceVTable(void** pTable, size_t size) {
 	ZeroMemory(&d3dpp, sizeof(d3dpp));
 	d3dpp.Windowed = false;
 	d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
-	d3dpp.hDeviceWindow = GetProcessWindow();
+	d3dpp.hDeviceWindow = getProcessWindow();
 
 	HRESULT dummyDevCreated = pD3D->CreateDevice(
 		D3DADAPTER_DEFAULT,
@@ -83,7 +83,7 @@ bool DXD3D9::GetD3D9DeviceVTable(void** pTable, size_t size) {
 }
 
 //Get vtable of DirectInputDevice8, for hooking GetDeviceState, like vtable of Direct3D9Device
-bool DXD3D9::GetDInputDeviceVTable(void** table, size_t size) {
+bool DXD3D9::getDInputDeviceVTable(void** table, size_t size) {
 	IDirectInput8A* pDI = nullptr;
 	IDirectInputDevice8A* pMouse = nullptr;
 
@@ -110,4 +110,5 @@ DXD3D9::DXD3D9()
 
 	present = nullptr;
 	resetFunc = nullptr;
+	isResourceInit = false;
 }
