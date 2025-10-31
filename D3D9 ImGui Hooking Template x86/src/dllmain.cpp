@@ -44,6 +44,7 @@ DWORD WINAPI HackThread(HMODULE hModule) {
 		Hooking::freeGateway();
 
 		FreeLibraryAndExitThread(hModule, 0);
+		CloseHandle(hModule);
 		return 0;
 	}
 }
